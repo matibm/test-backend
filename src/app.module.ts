@@ -10,6 +10,8 @@ import { Transaction } from './entities/transactions.entity';
 import { UsersService } from './users/users.service';
 import { Session } from './entities/session.entity';
 import { MongoRepository } from 'typeorm';
+import { APP_FILTER } from '@nestjs/core';
+import { HttpExceptionFilter } from './http-exception.filter';
 
 @Module({
   imports: [
@@ -20,25 +22,34 @@ import { MongoRepository } from 'typeorm';
       synchronize: true, // Sincronización automática de esquemas (solo para desarrollo)
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      entities: [ User, Transaction, Session ],
-       
+      entities: [User, Transaction, Session],
     }),
-     TransactionsModule, UsersModule, AuthModule],
+    TransactionsModule,
+    UsersModule,
+    AuthModule,
+  ],
   controllers: [AppController],
-  providers: [AppService, UsersService],
+  providers: [
+    AppService,
+    UsersService,
+    {
+      provide: APP_FILTER,
+      useClass: HttpExceptionFilter,
+    },
+  ],
 })
 export class AppModule implements OnApplicationBootstrap {
   constructor(
     private readonly userService: UsersService,
     @InjectRepository(Session)
-    private readonly sessionRepository: MongoRepository<Session>
-    ) {}
+    private readonly sessionRepository: MongoRepository<Session>,
+  ) {}
 
   async onApplicationBootstrap(): Promise<void> {
     this.setupIndexes();
     await this.userService.initAdminUser(); // Llama al método de inicialización del usuario administrador
   }
-  
+
   async setupIndexes(): Promise<void> {
     await this.sessionRepository.createCollectionIndex(
       { expireAt: 1 },
