@@ -5,10 +5,11 @@ import { jwtConstants } from './constants';
 import { JwtStrategy } from './jwt.strategy';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/entities/user.entity';
+import { Session } from 'src/entities/session.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, Session]),
     JwtModule.register({
       secret: jwtConstants.secret,
       signOptions: { expiresIn: '15m' }, // Tokens válidos por 15 minutos
