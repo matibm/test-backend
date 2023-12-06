@@ -15,7 +15,7 @@ import { HttpExceptionFilter } from './http-exception.filter';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Session]),
+    TypeOrmModule.forFeature([User, Session, Transaction]),
     TypeOrmModule.forRoot({
       type: 'mongodb',
       url: 'mongodb://localhost:27017/test-nestjs',
@@ -43,17 +43,23 @@ export class AppModule implements OnApplicationBootstrap {
     private readonly userService: UsersService,
     @InjectRepository(Session)
     private readonly sessionRepository: MongoRepository<Session>,
+    @InjectRepository(Transaction)
+    private readonly transactionRepository: MongoRepository<Transaction>
   ) {}
 
   async onApplicationBootstrap(): Promise<void> {
     this.setupIndexes();
-    await this.userService.initAdminUser(); // Llama al método de inicialización del usuario administrador
+    await this.userService.initAdminUser(); 
   }
 
   async setupIndexes(): Promise<void> {
     await this.sessionRepository.createCollectionIndex(
       { expireAt: 1 },
       { expireAfterSeconds: 900 },
+    );
+    await this.transactionRepository.createCollectionIndex(
+      { userId: 1 },  
+      { name: 'userIdIndex' } 
     );
   }
 }

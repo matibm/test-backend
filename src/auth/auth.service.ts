@@ -33,6 +33,7 @@ export class AuthService {
 
     if (user && (await this.validateUser(user, password))) {
       const payload = { email: user.email, sub: user.id };
+      this.createSession(user.id.toString());
       return {
         access_token: this.jwtService.sign(payload, {
           expiresIn: '900s',
