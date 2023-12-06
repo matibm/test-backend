@@ -14,11 +14,11 @@ import { APP_FILTER } from '@nestjs/core';
 import { HttpExceptionFilter } from './http-exception.filter';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([User, Session, Transaction]),
+  imports: [    
+    TypeOrmModule.forFeature([User, Session, Transaction]), 
     TypeOrmModule.forRoot({
       type: 'mongodb',
-      url: 'mongodb://localhost:27017/test-nestjs',
+      url: process.env.MONGO_URI,
       synchronize: true, // Sincronización automática de esquemas (solo para desarrollo)
       useNewUrlParser: true,
       useUnifiedTopology: true,
@@ -32,6 +32,7 @@ import { HttpExceptionFilter } from './http-exception.filter';
   providers: [
     AppService,
     UsersService,
+    
     {
       provide: APP_FILTER,
       useClass: HttpExceptionFilter,

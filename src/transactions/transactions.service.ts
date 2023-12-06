@@ -2,7 +2,7 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Transaction } from 'src/entities/transactions.entity';
 import { Repository, UpdateResult } from 'typeorm';
-import { ObjectId } from 'mongodb';
+import { ObjectId, MongoClient } from 'mongodb';
 import { validate } from 'class-validator';
 
 @Injectable()
@@ -10,7 +10,10 @@ export class TransactionsService {
   constructor(
     @InjectRepository(Transaction)
     private readonly transactionRepository: Repository<Transaction>,
-  ) {}
+  ) {
+    this.connectMongoClient();
+  }
+  private mongoClient: MongoClient;
   private readonly allowedFields = ['userId', 'amount', 'description'];
 
   async findAll(): Promise<Transaction[]> {
@@ -66,8 +69,10 @@ export class TransactionsService {
       id,
       updateTransactionDto,
     );
-    if (updatedTransaction.affected === 0) {
-      throw new BadRequestException(`Update with id ${id} not affected`);
+    console.log(updatedTransaction);
+    
+    if (updatedTransaction.raw?.matchedCount === 0) {
+      throw new BadRequestException(`Transaction with id ${id} not found`);
     }
     return this.findOne({ _id: new ObjectId(id) });
   }
@@ -139,6 +144,8 @@ export class TransactionsService {
 
     console.log(`Total de transacciones actualizadas: ${transactionsUpdated}`);
   }
+
+  // this doesn't work with typeorm
   async updateTransactionsByUserId3(
     userId: string,
     newData: Partial<Transaction>,
@@ -149,21 +156,23 @@ export class TransactionsService {
     );
     return data;
   }
+
   async updateTransactionsByUserId(
     userId: string,
     newData: Partial<Transaction>,
-  ): Promise<UpdateResult> {
-    const operations = [
-      {
-        updateMany: {
-          filter: { userId: new ObjectId(userId) },
-          update: { $set: newData },
-        },
-      },
-    ];
-  
-    const result = await this.transactionRepository.query('db.transactions.bulkWrite', [operations]);
-    return result;
+  ): Promise<any> {
+    try {
+      const transactionsCollection = this.mongoClient
+        .db(process.env.DB_NAME)
+        .collection('transaction');
+
+      return await transactionsCollection.updateMany(
+        { userId: new ObjectId(userId) },
+        { $set: newData },
+      );
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   private filterFields(
@@ -176,5 +185,15 @@ export class TransactionsService {
         obj[key] = data[key];
         return obj;
       }, {});
+  }
+
+  connectMongoClient() {
+    try {
+      const mongoUrl = process.env.MONGO_URI;
+      this.mongoClient = new MongoClient(mongoUrl);
+      this.mongoClient.connect();
+    } catch (error) {
+      console.error('Error connecting to MongoDB:', error);
+    }
   }
 }

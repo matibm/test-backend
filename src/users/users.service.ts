@@ -23,9 +23,11 @@ export class UsersService {
     return this.userRepository.findOne({ where: query });
   }
   async getUser(query: any): Promise<Partial<User> | undefined> {
-    return this.excludePassword(
-      await this.userRepository.findOne({ where: query }),
-    );
+    const user = await this.userRepository.findOne({ where: query });
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+    return this.excludePassword(user);
   }
 
   async create(userData: Partial<User>): Promise<Partial<User>> {
@@ -80,6 +82,9 @@ export class UsersService {
   }
 
   private excludePassword(user: User): Partial<User> {
+    if (!user) {
+      return user;
+    }
     const { password, ...result } = user;
     return result;
   }
