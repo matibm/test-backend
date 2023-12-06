@@ -1,39 +1,82 @@
-# NestJS Transactions and Users API
+# Test Nodejs Nestjs
 
-This project is a NodeJS application built with NestJS that provides functionality for managing transactions and users with basic security support using JWT tokens.
+## Overview
 
-## Features
+This project is a NestJS application that implements functionalities for managing transactions and users, with authentication support using JWT tokens. It utilizes MongoDB as the preferred database for storing data.
 
-### Transactions Module
-- Controller and service for handling transactions
-- CRUD operations for transactions: creation, deletion, retrieval, and partial update
+---
 
-### Users Module
-- Controller and service for managing users
-- CRUD operations for users: creation, deletion, retrieval, and partial update
+## Table of Contents
 
-### Authentication Module
-- Basic security support using username/password
-- Generates JWT token sessions
-- Custom decorator to secure controller endpoints with JWT token validation
-- Sessions last at least 15 minutes
+- [Installation](#installation)
+- [Usage](#usage)
+- [Features](#features)
+- [Technologies Used](#technologies-used)
 
-## Bonus Features
+---
 
-### Partially Updating User Transactions
-- Algorithm to efficiently update transactions for a user with a large number of transactions
-- Supports batch updates for improved performance
+## Installation
 
+To get started with this project, follow these steps:
+
+1. Clone the repository.
+```
+git clone https://github.com/matibm/test-backend.git
+```
+2. Install dependencies.
+```
+cd test-backend
+npm install
+```
+3. Set up environment variables.
+
+Create a `.env` file at the root of the project and add necessary environment variables like `MONGO_URI`, `JWT_SECRET`, etc.
+
+4. Start the server.
+
+```
+npm start
+```
 
 ## Usage
 
-1. Clone the repository
-2. Install dependencies: `npm install`
-3. Set up the database and configuration
-4. Run the application: `npm start`
+### Running the Application
 
-## Contributing
-Feel free to contribute by opening issues or submitting pull requests.
+### API Documentation
 
-## License
-This project is licensed under the [MIT License](LICENSE).
+- `/users`: Manages user-related operations (CRUD).
+- `/transactions`: Manages transaction-related operations (CRUD).
+- `/users/login`: Authentication-related endpoints for login and sessions.
+
+See the complete documentation with Postman:
+https://documenter.getpostman.com/view/12996092/2s9YeMzng7
+
+### Authentication
+
+The application uses JWT tokens for authentication. To access secure endpoints, obtain a token via the login endpoint (`/users/login`) and include it in the `Authorization` header for subsequent requests.
+
+---
+
+## Features
+
+- **Transactions Module:**
+  - Create, read, update, and delete transactions.
+- **Users Module:**
+  - Create, read, update, and delete user information.
+- **Authentication:**
+  - Basic security using JWT tokens with sessions lasting at least 15 minutes.
+- **Bonus Features:**
+  - Algorithm for partial updates to multiple transactions of a user.
+  - MongoDB session cleanup using temporary data support.
+
+---
+
+## Technologies Used
+
+- NestJS
+- MongoDB
+- TypeScript
+- JWT for authentication
+- TypeORM (for ORM with databases)
+
+
